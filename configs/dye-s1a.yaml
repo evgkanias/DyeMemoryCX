@@ -1,0 +1,17 @@
+simulation_name: Dye-S1a
+ts_outbound: 1000
+ts_inbound: 1500
+step_size: 0.1
+seed: [2000, 2099]
+noise: [0.0, 0.4]
+cx_class: DyeModel
+cx_params:
+  epsilon: 1.58e+05  # /M/cm
+  length: 9.0e-04  # cm
+  phi: 0.002  # percentile (0.2%)
+  wavelength: 1.30e-07  # m
+  k: 8.13e-06  # s^-1
+  c_tot: 1.08e-02  # M
+  volume: 1.85e-10  # L
+  w_max: 1.30e-07  # J/s
+  gain: 1.0

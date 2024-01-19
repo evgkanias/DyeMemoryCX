@@ -1,0 +1,9 @@
+simulation_name: Original
+ts_outbound: 1000
+ts_inbound: 1500
+step_size: 0.1
+seed: [2000, 2099]
+noise: [0.0, 0.4]
+cx_class: OriginalModel
+cx_params:
+  gain: 0.025
