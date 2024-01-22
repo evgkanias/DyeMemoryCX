@@ -2,8 +2,8 @@ simulation_name: Dye-S2a
 ts_outbound: 1000
 ts_inbound: 1500
 step_size: 0.1
-seed: [2054]
-noise: [0.1]
+seed: [2000, 2099]
+noise: [0.0, 0.4]
 cx_class: DyeModel
 cx_params:
   epsilon: 1.58e+05  # /M/cm

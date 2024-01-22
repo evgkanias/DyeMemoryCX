@@ -1,4 +1,5 @@
 import dyememorycx.simulation as sim
+import dyememorycx.dye_io as dio
 
 import multiprocessing as mp
 import numpy as np
@@ -20,9 +21,9 @@ LOGGER = lg.logger.add(
 )
 
 
-def main(simulation_name='pi', route='random', ts_outbound=1000, ts_inbound=1500,
-         step_size=0.01, seed=2023, noise=0.1, animation=None,
-         cx_class='StoneCX', cx_params=None, threads=None):
+def run_simulation(simulation_name='pi', route='random', ts_outbound=1000, ts_inbound=1500,
+                   step_size=0.01, seed=2023, noise=0.1, animation=None,
+                   cx_class='StoneCX', cx_params=None, threads=None):
 
     if not isinstance(seed, list):
         seed = [seed]
@@ -63,73 +64,92 @@ if __name__ == '__main__':
     import argparse
     import yaml
 
-    with warnings.catch_warnings():
+    with (warnings.catch_warnings()):
         warnings.simplefilter("ignore")
 
         parser = argparse.ArgumentParser(
             description="Run a path integration test."
         )
 
-        parser.add_argument("-c", dest='config_file', type=str, required=False, default=None,
+        parser.add_argument("module", choices=['run_simulation', 'show_results', 'fit_curves', 'single_curve'])
+        parser.add_argument("-c", "--config", dest='config_file', type=str, required=False, default=None,
                             help="File with the configuration for the experiment.")
-        parser.add_argument('-r', dest='results_file', type=str, required=False, default=None,
+        parser.add_argument("-r", "--result", dest='results_file', type=str, required=False, default=None,
                             help='Load the results instead of running them.')
-        parser.add_argument('-a', dest='results_directory', type=str, required=False, default=None,
+        parser.add_argument("-a", "--summarise-results", dest='results_directory', type=str, required=False, default=None,
                             help='Load the results in the directory to plot summary.')
-        parser.add_argument('-s', dest='save_directory', type=str, required=False, default=None,
+        parser.add_argument("-s", "--save", dest='save_directory', type=str, required=False, default=None,
                             help='Save the plots in directory.')
-        parser.add_argument('-t', dest='plot_type', type=str, required=False, default='PNG',
+        parser.add_argument("-t", "--plot-file-type", dest='plot_type', type=str, required=False, default='PNG',
                             help='The file-types of the plots.')
+        parser.add_argument('-o', '--optimise', dest='optimise', type=bool, required=False, default=False,
+                            help='Run optimisation of the dye parameters.')
         parser.add_argument('--show', dest='show_plots', type=bool, required=False, default=True,
                             help='Activates or deactivates showing the plots.')
 
         p_args = parser.parse_args()
 
         kwargs = {}
-        if p_args.config_file is not None:
-            lg.logger.info(f"Reading configuration file: {p_args.config_file}")
-            with open(p_args.config_file, 'r') as f:
-                kwargs = yaml.safe_load(f)
-            main(**kwargs)
-
-        if p_args.results_file is not None:
-            dat = {}
-            if p_args.results_file in ["current", "last"]:
-                list_of_files = glob.glob(os.path.join('data', 'stats', '**', '*.npz'), recursive=True)
-                latest_file = os.path.abspath(max(list_of_files, key=os.path.getctime))
-                lg.logger.info(f"Reading simulation data file: {latest_file}")
-                dat[latest_file] = np.load(latest_file)
-            elif os.path.exists(p_args.results_file) and os.path.isdir(p_args.results_file):
-                list_of_files = glob.glob(os.path.join(p_args.results_file, '**', '*.npz'), recursive=True)
-
-                for f in list_of_files:
-                    dat[f] = np.load(f)
+        if p_args.module in ["run_simulation"]:
+            if p_args.config_file is None:
+                parser.print_help()
+                lg.logger.error("Configuration file was not set.")
             else:
-                lg.logger.info(f"Reading simulation data file: {p_args.results_file}")
-                dat[p_args.results_file] = np.load(p_args.results_file)
+                lg.logger.info(f"Reading configuration file: {p_args.config_file}")
+                with open(p_args.config_file, 'r') as f:
+                    kwargs = yaml.safe_load(f)
+                run_simulation(**kwargs)
 
-            for name_, dat_ in dat.items():
-                dir_name, file_name = os.path.split(name_)
-                _, dir_name = os.path.split(dir_name)
-                file_name = file_name[:-4]
-                sim.plot_results(dat_, name=f"{dir_name}_{file_name}",
-                                 save=p_args.save_directory, save_format=p_args.plot_type, show=p_args.show_plots)
+        if p_args.module in ["run_simulation", "show_results"]:
+            if p_args.module in ["show_results"] and p_args.results_file is None and p_args.results_directory is None:
+                parser.print_help()
+                lg.logger.error("Results file or directory has to be set.")
+            if p_args.results_file is not None:
+                dat = {}
+                if p_args.results_file in ["current", "last"]:
+                    list_of_files = glob.glob(os.path.join('data', 'stats', '**', '*.npz'), recursive=True)
+                    latest_file = os.path.abspath(max(list_of_files, key=os.path.getctime))
+                    lg.logger.info(f"Reading simulation data file: {latest_file}")
+                    dat[latest_file] = np.load(latest_file)
+                elif os.path.exists(p_args.results_file) and os.path.isdir(p_args.results_file):
+                    list_of_files = glob.glob(os.path.join(p_args.results_file, '**', '*.npz'), recursive=True)
 
-        if p_args.results_directory is not None:
-            if p_args.results_directory in ["current", "last"]:
-                list_of_dirs = glob.glob(os.path.join('data', 'stats', '*'))
-                latest_dir = os.path.abspath(max(list_of_dirs, key=os.path.getmtime))
-            else:
-                latest_dir = os.path.abspath(p_args.results_directory)
+                    for f in list_of_files:
+                        dat[f] = np.load(f)
+                else:
+                    lg.logger.info(f"Reading simulation data file: {p_args.results_file}")
+                    dat[p_args.results_file] = np.load(p_args.results_file)
 
-            lg.logger.info(f"Reading simulation data from directory: {latest_dir}")
-            list_of_files = glob.glob(os.path.join(latest_dir, '*.npz'))
+                for name_, dat_ in dat.items():
+                    dir_name, file_name = os.path.split(name_)
+                    _, dir_name = os.path.split(dir_name)
+                    file_name = file_name[:-4]
+                    sim.plot_results(dat_, name=f"{dir_name}_{file_name}",
+                                     save=p_args.save_directory, save_format=p_args.plot_type, show=p_args.show_plots)
 
-            dat = []
-            for file_i in list_of_files:
-                lg.logger.info(f"Reading data from: {file_i}")
-                dat.append(np.load(file_i))
+            if p_args.results_directory is not None:
+                if p_args.results_directory in ["current", "last"]:
+                    list_of_dirs = glob.glob(os.path.join('data', 'stats', '*'))
+                    latest_dir = os.path.abspath(max(list_of_dirs, key=os.path.getmtime))
+                else:
+                    latest_dir = os.path.abspath(p_args.results_directory)
 
-            sim.plot_summarised_results(dat, name=os.path.split(latest_dir)[-1],
-                                        save=p_args.save_directory, save_format=p_args.plot_type, show=p_args.show_plots)
+                lg.logger.info(f"Reading simulation data from directory: {latest_dir}")
+                list_of_files = glob.glob(os.path.join(latest_dir, '*.npz'))
 
+                dat = []
+                for file_i in list_of_files:
+                    lg.logger.info(f"Reading data from: {file_i}")
+                    dat.append(np.load(file_i))
+
+                sim.plot_summarised_results(dat, name=os.path.split(latest_dir)[-1],
+                                            save=p_args.save_directory, save_format=p_args.plot_type,
+                                            show=p_args.show_plots)
+
+        if p_args.module in ['fit_curves']:
+            dio.plot_fitted_curves(optimise=p_args.optimise,
+                                   save=p_args.save_directory, save_format=p_args.plot_type, show=p_args.show_plots)
+
+        if p_args.module in ['single_curve']:
+            dio.plot_dye_memory_dynamics(
+                save=p_args.save_directory, save_format=p_args.plot_type, show=p_args.show_plots)

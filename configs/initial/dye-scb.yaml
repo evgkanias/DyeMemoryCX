@@ -1,11 +1,10 @@
-simulation_name: AP-048-SC
-route: random
+simulation_name: Dye-SCa
 ts_outbound: 1000
 ts_inbound: 1500
 step_size: 0.1
 seed: [2000, 2099]
-noise: 0.1
-cx_class: DyeMemoryCX
+noise: [0.0, 0.4]
+cx_class: DyeModel
 cx_params:
   epsilon: 1.58e+05  # /M/cm
   length: 2.5e-04  # cm
@@ -14,6 +13,5 @@ cx_params:
   c_tot: 6.04e-03  # M
   wavelength: 6.53e-07  # m
   volume: 9.74e-11  # L
-  W_max: 1.30e-07  # J/s
-  beta: 0.0
-  gain: 0.5
+  w_max: 1.30e-07  # J/s
+  gain: 1.0

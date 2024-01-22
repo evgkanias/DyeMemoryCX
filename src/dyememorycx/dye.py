@@ -95,7 +95,7 @@ def dcdt(u, transmittance_func, k=0.0, phi=0.00045, k_phi=1.0):
 
     Parameters
     ----------
-    u: np.ndarray[float]
+    u: np.ndarray[float], float
         the PFN output, i.e., its normalised activity
     transmittance_func
     k: np.ndarray[float], float

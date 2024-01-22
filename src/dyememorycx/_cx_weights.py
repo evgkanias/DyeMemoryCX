@@ -14,8 +14,6 @@ D72D7 = 0.5 * np.cos(D7_pref[:, None] - D7_pref[None, :]) - 0.5
 D72PFN = -np.tile(np.eye(8), (1, 2))
 
 D72PFL3 = -np.tile(np.eye(8), (1, 2))
-# D72PFL3 = np.hstack((D72PFL3[:, 7:8], D72PFL3[:, :7], D72PFL3[:, 9:], D72PFL3[:, 8:9]))
-# D72PFL3 = np.hstack((D72PFL3[:, 1:8], D72PFL3[:, :1], D72PFL3[:, -1:], D72PFL3[:, 8:-1]))
 
 FC2hD = np.eye(16)
 
@@ -23,11 +21,9 @@ PFN2FC2 = np.eye(16)
 
 FC2PFL3 = np.kron(1 - np.eye(2), np.eye(8))
 FC2PFL3 = np.hstack((FC2PFL3[:, 7:8], FC2PFL3[:, :7], FC2PFL3[:, 9:], FC2PFL3[:, 8:9]))
-# FC2PFL3 = np.hstack((FC2PFL3[:, 1:8], FC2PFL3[:, :1], FC2PFL3[:, -1:], FC2PFL3[:, 8:-1]))
 
 hD2PFL3 = -np.kron(np.eye(4)[::-1], np.eye(4))
 hD2PFL3 = np.hstack((hD2PFL3[:, 7:8], hD2PFL3[:, :7], hD2PFL3[:, 9:], hD2PFL3[:, 8:9]))
-# hD2PFL3 = np.hstack((hD2PFL3[:, 1:8], hD2PFL3[:, :1], hD2PFL3[:, -1:], hD2PFL3[:, 8:-1]))
 
 
 if __name__ == "__main__":
