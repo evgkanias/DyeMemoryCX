@@ -48,8 +48,12 @@ class OriginalModel(object):
 
         omega = speed * np.ones(2, dtype=float) / np.sqrt(2)
 
-        self.r_LNO1[:] = np.clip(omega + self.rng.normal(scale=self.noise, size=self.r_LNO1.shape), 0, 1)
-        self.r_LNO2[:] = np.clip(0.5 * (1.0 - omega) + self.rng.normal(scale=self.noise, size=self.r_LNO2.shape), 0, 1)
+        # self.r_LNO1[:] = np.clip(omega, 0, 1)
+        # self.r_LNO2[:] = np.clip(0.5 * (1.0 - omega), 0, 1)
+        self.r_LNO1[:] = np.clip(omega + uniform_noise(self.noise, self.rng, self.r_LNO1.shape), 0, 1)
+        self.r_LNO2[:] = np.clip(0.5 * (1.0 - omega) + uniform_noise(self.noise, self.rng, self.r_LNO2.shape), 0, 1)
+        # self.r_LNO1[:] = np.clip(omega + self.rng.normal(scale=self.noise, size=self.r_LNO1.shape), 0, 1)
+        # self.r_LNO2[:] = np.clip(0.5 * (1.0 - omega) + self.rng.normal(scale=self.noise, size=self.r_LNO2.shape), 0, 1)
         self.r_ER[:] = self.a_func(6.8 * np.cos(theta - wt.ER_pref) - 3.0)
         self.r_EPG[:] = self.a_func(3.0 * self.r_ER.dot(wt.ER2EPG) + 0.5)
         self.r_D7[:] = self.a_func(5.0 * (0.667 * self.r_EPG.dot(wt.EPG2D7) + 0.333 * self.r_D7.dot(wt.D72D7)))
@@ -73,7 +77,7 @@ class OriginalModel(object):
         return self.c_FC2 + self.gain * self.s_PFN * dt
 
     def motor_output(self):
-        motor = self.r_PFL3.reshape((2, -1)).sum(axis=1)  # + self.noise * (self.rng.rand(2) - 0.5)
+        motor = self.r_PFL3.reshape((2, -1)).sum(axis=1) + uniform_noise(self.noise, self.rng, 2)
 
         return 0.25 * (motor[0] - motor[1])
 
@@ -111,4 +115,8 @@ class DyeModel(OriginalModel):
 
 
 def logistic(x, noise=0., rng=np.random):
-    return np.clip(ss.expit(x) + rng.uniform(low=-noise, high=noise, size=x.shape), 0., 1.)
+    return np.clip(ss.expit(x) + uniform_noise(noise, rng, x.shape), 0., 1.)
+
+
+def uniform_noise(noise=0.0, rng=np.random, shape=None):
+    return rng.uniform(low=-noise, high=noise, size=shape)
