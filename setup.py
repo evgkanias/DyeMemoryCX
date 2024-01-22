@@ -13,8 +13,7 @@ setuptools.setup(
     maintainer="Evripidis Gkanias",
     author_email="ev.gkanias@ed.ac.uk",
     maintainer_email="ev.gkanias@ed.ac.uk",
-    description="Python package of simulation and optimisation of path integration circuits using properties of "
-                "fluorecent dyes.",
+    description="Python package of simulation and optimisation of path integration circuits using properties of fluorecent dyes.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/InsectRobotics/DyeMemoryCX",
@@ -28,7 +27,7 @@ setuptools.setup(
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.11",
+    python_requires=">=3.9",
     install_requirements=requirements,
     project_urls={
         "Bug Reports": "https://github.com/InsectRobotics/DyeMemoryCX/issues",
