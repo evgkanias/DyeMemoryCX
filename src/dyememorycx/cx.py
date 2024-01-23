@@ -48,12 +48,9 @@ class OriginalModel(object):
 
         omega = speed * np.ones(2, dtype=float) / np.sqrt(2)
 
-        # self.r_LNO1[:] = np.clip(omega, 0, 1)
-        # self.r_LNO2[:] = np.clip(0.5 * (1.0 - omega), 0, 1)
         self.r_LNO1[:] = np.clip(omega + uniform_noise(self.noise, self.rng, self.r_LNO1.shape), 0, 1)
         self.r_LNO2[:] = np.clip(0.5 * (1.0 - omega) + uniform_noise(self.noise, self.rng, self.r_LNO2.shape), 0, 1)
-        # self.r_LNO1[:] = np.clip(omega + self.rng.normal(scale=self.noise, size=self.r_LNO1.shape), 0, 1)
-        # self.r_LNO2[:] = np.clip(0.5 * (1.0 - omega) + self.rng.normal(scale=self.noise, size=self.r_LNO2.shape), 0, 1)
+
         self.r_ER[:] = self.a_func(6.8 * np.cos(theta - wt.ER_pref) - 3.0)
         self.r_EPG[:] = self.a_func(3.0 * self.r_ER.dot(wt.ER2EPG) + 0.5)
         self.r_D7[:] = self.a_func(5.0 * (0.667 * self.r_EPG.dot(wt.EPG2D7) + 0.333 * self.r_D7.dot(wt.D72D7)))

@@ -103,6 +103,8 @@ def plot_fitted_curves(optimise=False, config_dir=None, show=True, save=None, sa
     fig.tight_layout()
     plt.tight_layout()
     if save is not None:
+        if not os.path.exists(save):
+            os.makedirs(save)
         plt.savefig(os.path.join(save, f"fit_curves.{save_format.lower()}"), dpi=600, format=save_format)
     if show:
         plt.show()
@@ -149,6 +151,8 @@ def plot_dye_memory_dynamics(config_dir=None, show=True, save=None, save_format=
     fig.tight_layout()
     plt.tight_layout()
     if save is not None:
+        if not os.path.exists(save):
+            os.makedirs(save)
         plt.savefig(os.path.join(save, f"single_curve.{save_format.lower()}"), dpi=600, format=save_format)
     if show:
         plt.show()

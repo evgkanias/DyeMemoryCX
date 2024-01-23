@@ -41,7 +41,7 @@ def run_simulation(simulation_name='pi', route='random', ts_outbound=1000, ts_in
         noise = np.arange(noise[0], noise[1] + 0.1, 0.1).tolist()
 
     if threads is None:
-        threads = np.minimum(len(seed), 8)
+        threads = np.minimum(len(seed), 4)
 
     tasks = []
     for ns in noise:
@@ -86,6 +86,8 @@ if __name__ == '__main__':
                             help='Run optimisation of the dye parameters.')
         parser.add_argument('--show', dest='show_plots', type=bool, required=False, default=True,
                             help='Activates or deactivates showing the plots.')
+        parser.add_argument('--threads', dest='nb_threads', type=int, required=False, default=None,
+                            help='The number of threads to use for running multiple experiments in parallel.')
 
         p_args = parser.parse_args()
 
@@ -98,6 +100,7 @@ if __name__ == '__main__':
                 lg.logger.info(f"Reading configuration file: {p_args.config_file}")
                 with open(p_args.config_file, 'r') as f:
                     kwargs = yaml.safe_load(f)
+                kwargs['threads'] = p_args.nb_threads
                 run_simulation(**kwargs)
 
         if p_args.module in ["run_simulation", "show_results"]:

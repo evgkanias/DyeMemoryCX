@@ -224,6 +224,8 @@ def plot_results(data, name='results', show=True, save=None, save_format=None):
     fig.tight_layout()
     plt.tight_layout()
     if save is not None:
+        if not os.path.exists(save):
+            os.makedirs(save)
         plt.savefig(os.path.join(save, f"{name}.{save_format.lower()}"), dpi=600, format=save_format)
     if show:
         plt.show()
@@ -360,6 +362,8 @@ def plot_summarised_results(data, name='summarised_results', show=True, save=Non
 
     plt.tight_layout()
     if save is not None:
+        if not os.path.exists(save):
+            os.makedirs(save)
         plt.savefig(os.path.join(save, f"{name}.{save_format.lower()}"), dpi=600, format=save_format)
     if show:
         plt.show()
