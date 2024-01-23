@@ -1,5 +1,7 @@
 # Dye Memory Central Complex Project
 
+![Example](docs/example.png)
+
 ## Environment
 
 In order to use this codem the required packages are listed below:
