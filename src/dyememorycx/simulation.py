@@ -232,13 +232,13 @@ def plot_results(data, name='results', show=True, save=None, save_format=None):
 
 
 def plot_summarised_results(data, name='summarised_results', show=True, save=None, save_format=None):
-    if "stone" in name:
+    if "original" in name.lower():
         line_colour = "#ff00ffff"
     else:
         line_colour = "orange"
 
     x_perc = np.linspace(-150, 200, 1051)
-    dataset = {"xy": [], "yaw": [], "perc": [], "turn": [], "tau": [], "tau_opt": [], "memory": []}
+    dataset = {"xy": [], "yaw": [], "perc": [], "turn": [], "tau": [], "tau_opt": [], "memory": [], "memory error": []}
     for datum in data:
         if datum['xy_return'].shape[0] < 1:
             continue
@@ -269,8 +269,10 @@ def plot_summarised_results(data, name='summarised_results', show=True, save=Non
 
         r_memory = datum['FC2_mem']
         pref_angles = np.linspace(0, 4 * np.pi, r_memory.shape[1], endpoint=False) + np.pi
-        memory = np.sum(r_memory * np.exp(1j * pref_angles[None, :]), axis=1)
+        memory = np.sum(r_memory * np.exp(1j * (pref_angles[None, :] + np.pi)), axis=1)
         dataset["memory"].append(np.interp(x_perc, t_per, memory))
+        memory_error = abs(l * memory - xy) / l_in[0] * 100
+        dataset["memory error"].append(np.interp(x_perc, t_per, memory_error))
 
     plt.figure(name, figsize=(2.5, 5))
 
@@ -334,15 +336,16 @@ def plot_summarised_results(data, name='summarised_results', show=True, save=Non
 
     # memory error
     plt.subplot(313)
-    v_memory = np.array(dataset['memory'])
-    a_memory = np.angle(v_memory, deg=True)
+    # v_memory = np.array(dataset['memory'])
+    # a_memory = np.angle(v_memory, deg=True)
+    # memory_error = abs((home_headings - a_memory + 180) % 360 - 180)
 
-    memory_error = abs((home_headings - a_memory + 180) % 360 - 180)
+    memory_error = np.array(dataset['memory error'])
     memory_error_25 = np.quantile(memory_error, 0.25, axis=0)
     memory_error_50 = np.quantile(memory_error, 0.50, axis=0)
     memory_error_75 = np.quantile(memory_error, 0.75, axis=0)
 
-    plt.plot([x_mean[turn]] * 2, [0, 90], 'k:')
+    plt.plot([x_mean[turn]] * 2, [0, 100], 'k:')
 
     plt.fill_between(x_mean[:turn], memory_error_25[:turn], memory_error_75[:turn],
                      color='grey', edgecolor=None, alpha=0.2)
@@ -354,8 +357,8 @@ def plot_summarised_results(data, name='summarised_results', show=True, save=Non
 
     plt.xticks([-500, -400, -300, -200, -100, 0, 100, 200, 300, 400, 500],
                [-500, "", -300, "", -100, "", 100, "", 300, "", 500])
-    plt.yticks([0, 30, 60, 90])
-    plt.ylim(0, 90)
+    plt.yticks([0, 25, 50, 75, 100])
+    plt.ylim(0, 100)
     plt.xlim(x_min, x_max)
     plt.ylabel(r'memory error [$^o$]', fontsize=8)
     plt.xlabel('distance travelled\nrelative to turning point [%]', fontsize=8)
